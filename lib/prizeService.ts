@@ -49,9 +49,14 @@ export class PrizeService {
   }
 
   async updatePrizes(prizes: Prize[]): Promise<void> {
+    console.log('updatePrizes called with:', prizes.length, 'prizes');
+    console.log('isProduction:', this.isProduction);
+    console.log('hasBlob:', this.hasBlob);
+    
     try {
       if (this.hasBlob && this.isProduction) {
         // Versuche in Vercel Blob zu speichern (nur in Produktion)
+        console.log('Attempting to save to Vercel Blob...');
         try {
           const { put } = await import('@vercel/blob');
           const blob = await put('prizes.json', JSON.stringify(prizes, null, 2), {
@@ -62,11 +67,12 @@ export class PrizeService {
           return;
         } catch (blobError) {
           console.error('Vercel Blob Fehler:', blobError);
-          // Kein Fallback mehr - Fehler werfen
-          throw new Error('Vercel Blob ist nicht verfügbar');
+          console.error('Blob Error Details:', JSON.stringify(blobError, null, 2));
+          throw blobError;
         }
       } else {
         // Lokale Entwicklung: Speichere in Datei
+        console.log('Saving locally...');
         const fs = await import('fs/promises');
         const path = await import('path');
         const PRIZES_FILE = path.join(process.cwd(), 'data', 'prizes.json');
@@ -76,6 +82,7 @@ export class PrizeService {
       }
     } catch (error) {
       console.error('Error updating prizes:', error);
+      console.error('Error Details:', JSON.stringify(error, null, 2));
       throw new Error('Failed to update prizes: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
