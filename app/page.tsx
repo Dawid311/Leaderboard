@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { LeaderboardData } from '../types';
+import CountdownTimer from '../components/CountdownTimer';
 
 export default function HomePage() {
   const [data, setData] = useState<LeaderboardData | null>(null);
@@ -58,6 +59,9 @@ export default function HomePage() {
 
       {data && (
         <>
+          {/* Timer Section */}
+          <CountdownTimer timer={data.timer} />
+
           <div style={{ marginBottom: '20px' }}>
             <small>Letzte Aktualisierung: {new Date(data.lastUpdated).toLocaleString('de-DE')}</small>
           </div>

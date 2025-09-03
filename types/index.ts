@@ -12,8 +12,16 @@ export interface Prize {
   value: string;
 }
 
+export interface TimerSettings {
+  endDate: string; // ISO Date String
+  title: string;
+  description: string;
+  isActive: boolean;
+}
+
 export interface LeaderboardData {
   entries: LeaderboardEntry[];
   prizes: Prize[];
+  timer: TimerSettings;
   lastUpdated: string;
 }

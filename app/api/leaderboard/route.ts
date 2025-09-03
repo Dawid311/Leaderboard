@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleSheetsService } from '../../../lib/googleSheets';
 import { DemoSheetsService } from '../../../lib/demoSheetsService';
 import { PrizeService } from '../../../lib/prizeService';
+import { TimerService } from '../../../lib/timerService';
 import { LeaderboardData } from '../../../types';
 
 const prizeService = new PrizeService();
+const timerService = new TimerService();
 
 export async function GET() {
   try {
@@ -20,11 +22,15 @@ export async function GET() {
       entries = await googleSheetsService.getLeaderboardData();
     }
 
-    const prizes = await prizeService.getPrizes();
+    const [prizes, timer] = await Promise.all([
+      prizeService.getPrizes(),
+      timerService.getTimer(),
+    ]);
 
     const leaderboardData: LeaderboardData = {
       entries,
       prizes,
+      timer,
       lastUpdated: new Date().toISOString(),
     };
 
