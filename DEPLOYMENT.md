@@ -34,6 +34,13 @@ Nach dem ersten Deployment über das Vercel Dashboard oder CLI:
 **Variable:** `GOOGLE_SHEET_ID`
 **Wert:** `159BP31mnBsZXyseTP36tBooaeCnVCHSoI3kvrV-UntQ`
 
+### 5. Vercel Blob aktivieren (für Preise-Speicherung)
+
+1. Gehe zu Vercel Dashboard → dein Projekt → Storage → Create Database
+2. Wähle "Blob" aus
+3. Bestätige die Einrichtung
+4. Der `BLOB_READ_WRITE_TOKEN` wird automatisch gesetzt
+
 #### Option B: Über Vercel CLI
 ```bash
 vercel env add GOOGLE_SERVICE_ACCOUNT_KEY

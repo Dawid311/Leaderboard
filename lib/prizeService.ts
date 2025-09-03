@@ -1,28 +1,66 @@
 import { Prize } from '../types';
-import fs from 'fs/promises';
-import path from 'path';
-
-const PRIZES_FILE = path.join(process.cwd(), 'data', 'prizes.json');
 
 export class PrizeService {
+  private isProduction = process.env.NODE_ENV === 'production';
+  private hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+
   async getPrizes(): Promise<Prize[]> {
     try {
-      const data = await fs.readFile(PRIZES_FILE, 'utf-8');
-      return JSON.parse(data);
+      if (this.hasBlob) {
+        // Versuche von Vercel Blob zu laden
+        const { list } = await import('@vercel/blob');
+        const blobs = await list({ prefix: 'prizes' });
+        
+        if (blobs.blobs.length > 0) {
+          const response = await fetch(blobs.blobs[0].url);
+          const data = await response.json();
+          return data;
+        }
+      } else if (!this.isProduction) {
+        // Lokale Entwicklung: Versuche aus Datei zu laden
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const PRIZES_FILE = path.join(process.cwd(), 'data', 'prizes.json');
+          const data = await fs.readFile(PRIZES_FILE, 'utf-8');
+          return JSON.parse(data);
+        } catch (fileError) {
+          // Datei existiert nicht, verwende Default
+        }
+      }
+      
+      // Fallback zu Default-Preisen
+      return this.getDefaultPrizes();
     } catch (error) {
-      // Return default prizes if file doesn't exist
+      console.log('Fehler beim Laden der Preise, verwende Default-Preise:', error instanceof Error ? error.message : String(error));
       return this.getDefaultPrizes();
     }
   }
 
   async updatePrizes(prizes: Prize[]): Promise<void> {
     try {
-      // Ensure data directory exists
-      await fs.mkdir(path.dirname(PRIZES_FILE), { recursive: true });
-      await fs.writeFile(PRIZES_FILE, JSON.stringify(prizes, null, 2));
+      if (this.hasBlob) {
+        // Speichere in Vercel Blob
+        const { put } = await import('@vercel/blob');
+        const blob = await put('prizes.json', JSON.stringify(prizes, null, 2), {
+          access: 'public',
+          contentType: 'application/json',
+        });
+        console.log('Preise erfolgreich in Vercel Blob gespeichert:', blob.url);
+      } else if (!this.isProduction) {
+        // Lokale Entwicklung: Speichere in Datei
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const PRIZES_FILE = path.join(process.cwd(), 'data', 'prizes.json');
+        await fs.mkdir(path.dirname(PRIZES_FILE), { recursive: true });
+        await fs.writeFile(PRIZES_FILE, JSON.stringify(prizes, null, 2));
+        console.log('Preise lokal gespeichert');
+      } else {
+        throw new Error('Keine Speichermöglichkeit verfügbar');
+      }
     } catch (error) {
       console.error('Error updating prizes:', error);
-      throw new Error('Failed to update prizes');
+      throw new Error('Failed to update prizes: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 
