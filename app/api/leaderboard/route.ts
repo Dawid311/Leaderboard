@@ -19,7 +19,7 @@ export async function GET() {
       entries = await googleSheetsService.getLeaderboardData();
     }
 
-    // Erstelle frische Instanzen für jeden Request
+    // Erstelle frische Instanzen für jeden Request ohne Cache
     const prizeService = new PrizeService();
     const timerService = new TimerService();
 
