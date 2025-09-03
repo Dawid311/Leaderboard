@@ -17,8 +17,8 @@ export default function AdminPage() {
     try {
       setLoading(true);
       const [prizeResponse, timerResponse] = await Promise.all([
-        fetch('/api/prizes'),
-        fetch('/api/timer')
+        fetch('/api/leaderboard?action=prizes'),
+        fetch('/api/leaderboard?action=timer')
       ]);
       
       if (prizeResponse.ok) {
@@ -41,7 +41,7 @@ export default function AdminPage() {
   const savePrizes = async () => {
     try {
       setSaving(true);
-      const response = await fetch('/api/prizes', {
+      const response = await fetch('/api/leaderboard?action=prizes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function AdminPage() {
     
     try {
       setSaving(true);
-      const response = await fetch('/api/timer', {
+      const response = await fetch('/api/leaderboard?action=timer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
