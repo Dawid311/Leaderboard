@@ -5,9 +5,6 @@ import { PrizeService } from '../../../lib/prizeService';
 import { TimerService } from '../../../lib/timerService';
 import { LeaderboardData } from '../../../types';
 
-const prizeService = new PrizeService();
-const timerService = new TimerService();
-
 export async function GET() {
   try {
     // Verwende Demo-Service wenn keine Service Account-Keys gesetzt sind
@@ -21,6 +18,10 @@ export async function GET() {
       const googleSheetsService = new GoogleSheetsService();
       entries = await googleSheetsService.getLeaderboardData();
     }
+
+    // Erstelle frische Instanzen für jeden Request
+    const prizeService = new PrizeService();
+    const timerService = new TimerService();
 
     const [prizes, timer] = await Promise.all([
       prizeService.getPrizes(),

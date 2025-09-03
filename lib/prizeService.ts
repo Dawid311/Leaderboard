@@ -1,15 +1,17 @@
 import { Prize } from '../types';
 
+// Globaler In-Memory Cache für Preise (funktioniert in Serverless)
+let globalPrizesCache: Prize[] | null = null;
+
 export class PrizeService {
   private isProduction = process.env.NODE_ENV === 'production';
   private hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
-  private memoryPrizes: Prize[] | null = null;
 
   async getPrizes(): Promise<Prize[]> {
     try {
       // Zuerst prüfen ob wir In-Memory Daten haben (Fallback)
-      if (this.memoryPrizes) {
-        return this.memoryPrizes;
+      if (globalPrizesCache) {
+        return globalPrizesCache;
       }
 
       if (this.hasBlob && this.isProduction) {
@@ -59,7 +61,7 @@ export class PrizeService {
           console.error('Vercel Blob Fehler:', blobError);
           // Fallback zu In-Memory Storage in Produktion
           console.log('Verwende In-Memory Fallback für Preise');
-          this.memoryPrizes = prizes;
+          globalPrizesCache = prizes;
           return;
         }
       } else {
