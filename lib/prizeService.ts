@@ -5,26 +5,43 @@ export class PrizeService {
   private hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
 
   async getPrizes(): Promise<Prize[]> {
+    console.log('getPrizes called');
+    console.log('isProduction:', this.isProduction);
+    console.log('hasBlob:', this.hasBlob);
+    
     try {
       if (this.hasBlob && this.isProduction) {
-        // Versuche von Vercel Blob zu laden (nur in Produktion)
+        // Versuche direkt die URL zu verwenden
         try {
-          const { list } = await import('@vercel/blob');
-          const blobs = await list({ prefix: 'prizes.json' });
-          
-          if (blobs.blobs.length > 0) {
-            // Sortiere nach uploadedAt um die neueste Version zu bekommen
-            const latestBlob = blobs.blobs.sort((a, b) => 
-              new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-            )[0];
-            
-            const response = await fetch(latestBlob.url);
+          const response = await fetch('https://mhpeqgrvzzmrz2fi.public.blob.vercel-storage.com/prizes.json');
+          if (response.ok) {
             const data = await response.json();
-            console.log('Preise von Vercel Blob geladen:', data.length, 'Preise');
+            console.log('Preise von direkte URL geladen:', data.length, 'Preise');
             return data;
+          } else {
+            console.log('Prizes blob nicht gefunden, verwende Default');
           }
-        } catch (blobError) {
-          console.error('Vercel Blob Fehler beim Laden:', blobError);
+        } catch (fetchError) {
+          console.log('Fetch Error:', fetchError);
+          // Fallback: Versuche mit list()
+          try {
+            const { list } = await import('@vercel/blob');
+            const blobs = await list({ prefix: 'prizes.json' });
+            
+            if (blobs.blobs.length > 0) {
+              // Sortiere nach uploadedAt um die neueste Version zu bekommen
+              const latestBlob = blobs.blobs.sort((a, b) => 
+                new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+              )[0];
+              
+              const response = await fetch(latestBlob.url);
+              const data = await response.json();
+              console.log('Preise von Vercel Blob geladen:', data.length, 'Preise');
+              return data;
+            }
+          } catch (blobError) {
+            console.error('Vercel Blob Fehler beim Laden:', blobError);
+          }
         }
       } else if (!this.isProduction) {
         // Lokale Entwicklung: Versuche aus Datei zu laden
