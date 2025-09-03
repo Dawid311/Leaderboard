@@ -8,13 +8,23 @@ export class PrizeService {
     try {
       if (this.hasBlob && this.isProduction) {
         // Versuche von Vercel Blob zu laden (nur in Produktion)
-        const { list } = await import('@vercel/blob');
-        const blobs = await list({ prefix: 'prizes' });
-        
-        if (blobs.blobs.length > 0) {
-          const response = await fetch(blobs.blobs[0].url);
-          const data = await response.json();
-          return data;
+        try {
+          const { list } = await import('@vercel/blob');
+          const blobs = await list({ prefix: 'prizes.json' });
+          
+          if (blobs.blobs.length > 0) {
+            // Sortiere nach uploadedAt um die neueste Version zu bekommen
+            const latestBlob = blobs.blobs.sort((a, b) => 
+              new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+            )[0];
+            
+            const response = await fetch(latestBlob.url);
+            const data = await response.json();
+            console.log('Preise von Vercel Blob geladen:', data.length, 'Preise');
+            return data;
+          }
+        } catch (blobError) {
+          console.error('Vercel Blob Fehler beim Laden:', blobError);
         }
       } else if (!this.isProduction) {
         // Lokale Entwicklung: Versuche aus Datei zu laden
@@ -30,6 +40,7 @@ export class PrizeService {
       }
       
       // Fallback zu Default-Preisen
+      console.log('Verwende Default-Preise');
       return this.getDefaultPrizes();
     } catch (error) {
       console.log('Fehler beim Laden der Preise, verwende Default-Preise:', error instanceof Error ? error.message : String(error));
