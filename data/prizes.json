@@ -1,0 +1,17 @@
+[
+  {
+    "position": 1,
+    "description": "1. Platz",
+    "value": "1000€"
+  },
+  {
+    "position": 2,
+    "description": "2. Platz", 
+    "value": "500€"
+  },
+  {
+    "position": 3,
+    "description": "3. Platz",
+    "value": "250€"
+  }
+]
