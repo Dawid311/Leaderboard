@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrizeService } from '../../../lib/prizeService';
 import { Prize } from '../../../types';
 
-const prizeService = new PrizeService();
-
 export async function GET() {
   try {
+    const prizeService = new PrizeService();
     const prizes = await prizeService.getPrizes();
     return NextResponse.json(prizes);
   } catch (error) {
@@ -40,6 +39,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const prizeService = new PrizeService();
     await prizeService.updatePrizes(prizes);
     return NextResponse.json({ success: true });
   } catch (error) {
