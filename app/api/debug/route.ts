@@ -16,19 +16,25 @@ export async function GET() {
 
 export async function POST() {
   try {
-    // Test Vercel Blob
-    const { put } = await import('@vercel/blob');
-    const testData = { test: 'data', timestamp: new Date().toISOString() };
+    // Erstelle eine prizes.json Datei mit Standard-Preisen
+    const defaultPrizes = [
+      {"position":1,"description":"🥇 1. Platz - Gold","value":"5000€"},
+      {"position":2,"description":"🥈 2. Platz - Silber","value":"2500€"}, 
+      {"position":3,"description":"🥉 3. Platz - Bronze","value":"1250€"},
+      {"position":4,"description":"4. Platz","value":"625€"},
+      {"position":5,"description":"5. Platz","value":"300€"}
+    ];
     
-    const blob = await put('test.json', JSON.stringify(testData), {
+    const { put } = await import('@vercel/blob');
+    const blob = await put('prizes.json', JSON.stringify(defaultPrizes), {
       access: 'public',
       contentType: 'application/json',
     });
     
-    return NextResponse.json({ success: true, url: blob.url });
+    return NextResponse.json({ success: true, url: blob.url, data: defaultPrizes });
   } catch (error) {
     return NextResponse.json({ 
-      error: 'Blob test failed', 
+      error: 'Failed to create prizes', 
       details: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
