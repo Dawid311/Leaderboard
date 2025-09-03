@@ -29,6 +29,7 @@ export async function POST() {
     const blob = await put('prizes.json', JSON.stringify(defaultPrizes), {
       access: 'public',
       contentType: 'application/json',
+      allowOverwrite: true,
     });
     
     return NextResponse.json({ success: true, url: blob.url, data: defaultPrizes });

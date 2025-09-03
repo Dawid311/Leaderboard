@@ -79,6 +79,7 @@ export class PrizeService {
           const blob = await put('prizes.json', JSON.stringify(prizes, null, 2), {
             access: 'public',
             contentType: 'application/json',
+            allowOverwrite: true,
           });
           console.log('Preise erfolgreich in Vercel Blob gespeichert:', blob.url);
           return;
