@@ -66,6 +66,7 @@ export class TimerService {
         const blob = await put('timer.json', JSON.stringify(timer, null, 2), {
           access: 'public',
           contentType: 'application/json',
+          allowOverwrite: true // Erlaube das Überschreiben der bestehenden Datei
         });
         console.log('Timer erfolgreich in Vercel Blob gespeichert:', blob.url);
       } else if (!this.isProduction) {
