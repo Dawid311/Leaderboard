@@ -67,22 +67,31 @@ export default function AdminPage() {
     
     try {
       setSaving(true);
+      
+      // Stelle sicher, dass isActive als Boolean gesetzt ist
+      const timerToSave = {
+        ...timer,
+        isActive: Boolean(timer.isActive)
+      };
+
       const response = await fetch('/api/leaderboard?action=timer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(timer),
+        body: JSON.stringify(timerToSave),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save timer');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to save timer');
       }
 
       setMessage({ type: 'success', text: 'Timer erfolgreich gespeichert!' });
     } catch (err) {
-      setMessage({ type: 'error', text: 'Fehler beim Speichern des Timers' });
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler';
+      setMessage({ type: 'error', text: `Fehler beim Speichern des Timers: ${errorMessage}` });
+      console.error('Timer save error:', err);
     } finally {
       setSaving(false);
     }

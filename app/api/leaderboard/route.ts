@@ -103,14 +103,22 @@ export async function POST(request: NextRequest) {
       const timerData: TimerSettings = await request.json();
       
       // Validiere Timer
-      if (!timerData.title || !timerData.description || !timerData.endDate) {
+      if (!timerData.title || !timerData.description || !timerData.endDate || typeof timerData.isActive !== 'boolean') {
         return NextResponse.json(
-          { error: 'Timer must have title, description, and endDate' },
+          { error: 'Timer must have title, description, endDate and isActive status' },
           { status: 400 }
         );
       }
 
-      await timerService.updateTimer(timerData);
+      // Stelle sicher, dass alle erforderlichen Felder vorhanden sind
+      const validatedTimer: TimerSettings = {
+        title: timerData.title,
+        description: timerData.description,
+        endDate: timerData.endDate,
+        isActive: timerData.isActive
+      };
+
+      await timerService.updateTimer(validatedTimer);
       return NextResponse.json({ success: true });
     }
 
