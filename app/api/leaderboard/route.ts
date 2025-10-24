@@ -100,26 +100,41 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'timer') {
-      const timerData: TimerSettings = await request.json();
-      
-      // Validiere Timer
-      if (!timerData.title || !timerData.description || !timerData.endDate || typeof timerData.isActive !== 'boolean') {
+      try {
+        const timerData: TimerSettings = await request.json();
+        
+        // Validiere Timer
+        if (!timerData || typeof timerData !== 'object') {
+          return NextResponse.json(
+            { error: 'Invalid timer data format' },
+            { status: 400 }
+          );
+        }
+
+        if (!timerData.title || !timerData.description || !timerData.endDate || typeof timerData.isActive !== 'boolean') {
+          return NextResponse.json(
+            { error: 'Timer must have title, description, endDate and isActive status' },
+            { status: 400 }
+          );
+        }
+
+        // Stelle sicher, dass alle erforderlichen Felder vorhanden sind
+        const validatedTimer: TimerSettings = {
+          title: timerData.title,
+          description: timerData.description,
+          endDate: timerData.endDate,
+          isActive: timerData.isActive
+        };
+
+        await timerService.updateTimer(validatedTimer);
+        return NextResponse.json({ success: true });
+      } catch (error) {
+        console.error('Fehler beim Speichern des Timers:', error);
         return NextResponse.json(
-          { error: 'Timer must have title, description, endDate and isActive status' },
-          { status: 400 }
+          { error: error instanceof Error ? error.message : 'Unknown error occurred while saving timer' },
+          { status: 500 }
         );
       }
-
-      // Stelle sicher, dass alle erforderlichen Felder vorhanden sind
-      const validatedTimer: TimerSettings = {
-        title: timerData.title,
-        description: timerData.description,
-        endDate: timerData.endDate,
-        isActive: timerData.isActive
-      };
-
-      await timerService.updateTimer(validatedTimer);
-      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json(

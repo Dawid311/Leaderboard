@@ -38,6 +38,27 @@ export class TimerService {
   }
 
   async updateTimer(timer: TimerSettings): Promise<void> {
+    // Validiere Timer-Daten
+    if (!timer || typeof timer !== 'object') {
+      throw new Error('Invalid timer data: Timer must be an object');
+    }
+
+    if (!timer.title || typeof timer.title !== 'string') {
+      throw new Error('Invalid timer data: Missing or invalid title');
+    }
+
+    if (!timer.description || typeof timer.description !== 'string') {
+      throw new Error('Invalid timer data: Missing or invalid description');
+    }
+
+    if (!timer.endDate || typeof timer.endDate !== 'string') {
+      throw new Error('Invalid timer data: Missing or invalid endDate');
+    }
+
+    if (typeof timer.isActive !== 'boolean') {
+      throw new Error('Invalid timer data: isActive must be a boolean');
+    }
+
     try {
       if (this.hasBlob) {
         // Speichere in Vercel Blob
@@ -51,16 +72,29 @@ export class TimerService {
         // Lokale Entwicklung: Speichere in Datei
         const fs = await import('fs/promises');
         const path = await import('path');
-        const TIMER_FILE = path.join(process.cwd(), 'data', 'timer.json');
-        await fs.mkdir(path.dirname(TIMER_FILE), { recursive: true });
+        const dataDir = path.join(process.cwd(), 'data');
+        const TIMER_FILE = path.join(dataDir, 'timer.json');
+        
+        try {
+          // Stelle sicher, dass das Verzeichnis existiert
+          await fs.access(dataDir);
+        } catch {
+          // Erstelle das Verzeichnis, wenn es nicht existiert
+          await fs.mkdir(dataDir, { recursive: true });
+        }
+
         await fs.writeFile(TIMER_FILE, JSON.stringify(timer, null, 2));
-        console.log('Timer lokal gespeichert');
+        console.log('Timer lokal gespeichert in:', TIMER_FILE);
       } else {
-        throw new Error('Keine Speichermöglichkeit verfügbar');
+        throw new Error('Keine Speichermöglichkeit verfügbar - weder Blob noch lokales Dateisystem');
       }
     } catch (error) {
-      console.error('Error updating timer:', error);
-      throw new Error('Failed to update timer: ' + (error instanceof Error ? error.message : String(error)));
+      console.error('Detaillierter Fehler beim Timer-Update:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to update timer: ${error.message}`);
+      } else {
+        throw new Error('Failed to update timer: Unknown error occurred');
+      }
     }
   }
 
