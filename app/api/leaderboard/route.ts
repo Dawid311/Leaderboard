@@ -124,7 +124,9 @@ export async function POST(request: NextRequest) {
           title: timerData.title,
           description: timerData.description,
           endDate: timerData.endDate,
-          isActive: timerData.isActive
+          isActive: timerData.isActive,
+          startExp: timerData.startExp,
+          contestStartDate: timerData.contestStartDate
         };
 
         await timerService.updateTimer(validatedTimer);

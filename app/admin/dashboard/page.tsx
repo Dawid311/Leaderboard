@@ -1,16 +1,24 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Prize, TimerSettings, LeaderboardEntry } from '../../../types';
 
-export default function AdminPage() {
+export default function AdminDashboard() {
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [timer, setTimer] = useState<TimerSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Prüfe Auth-Status und leite um
+    // Prüfe Auth-Status
     const token = localStorage.getItem('adminToken');
     if (!token) {
       router.replace('/admin/login');
+      return;
     }
+    loadData();
   }, [router]);
 
   const loadData = async () => {
@@ -36,6 +44,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    router.replace('/admin/login');
   };
 
   const savePrizes = async () => {
@@ -196,19 +209,37 @@ export default function AdminPage() {
     return endDate.getTime() <= now.getTime();
   };
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-
-  if (!token) {
+  if (loading) {
     return (
       <div className="container">
-        <div className="loading">Überprüfe Authentifizierung...</div>
+        <div className="loading">Lade Admin-Panel...</div>
       </div>
     );
   }
 
   return (
     <div className="container">
-      <h1>Admin Panel</h1>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '20px'
+      }}>
+        <h1>Admin Panel</h1>
+        <button
+          onClick={handleLogout}
+          className="btn"
+          style={{
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px'
+          }}
+        >
+          Abmelden
+        </button>
+      </div>
       
       <div className="navigation">
         <a href="/" className="nav-link">Leaderboard</a>
