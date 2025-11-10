@@ -44,14 +44,6 @@ export default function AdminPage() {
   const [timer, setTimer] = useState<TimerSettings | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
 
-  useEffect(() => {
-    // Prüfe Auth-Status und leite um
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.replace('/admin/login');
-    }
-  }, [router]);
-
   const loadData = async () => {
     try {
       setLoading(true);
@@ -76,6 +68,32 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Prüfe Auth-Status und leite um
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      router.replace('/admin/login');
+    }
+  }, [router]);
+
+  // Separater useEffect für das Laden der Daten
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      loadData();
+    }
+  }, []);
+
+  // Entferne Nachrichten automatisch nach 5 Sekunden
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const savePrizes = async () => {
     try {
