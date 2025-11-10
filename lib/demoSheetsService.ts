@@ -1,8 +1,8 @@
-import { LeaderboardEntry } from '../types';
+import { LeaderboardEntry, StartExp } from '../types';
 
 // Demo-Service für Tests ohne echte Google Sheets API
 export class DemoSheetsService {
-  async getLeaderboardData(): Promise<LeaderboardEntry[]> {
+  async getLeaderboardData(startExp?: StartExp[]): Promise<LeaderboardEntry[]> {
     // Simuliere API-Verzögerung
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -45,6 +45,24 @@ export class DemoSheetsService {
       },
     ];
 
-    return demoData;
+    if (!startExp) return demoData;
+
+    // Wenn Start-EXP vorhanden sind, berechne die Differenz
+    return demoData.map(entry => {
+      const startEntry = startExp.find(start => 
+        (start.instagram && start.instagram === entry.instagram) ||
+        (start.tiktok && start.tiktok === entry.tiktok) ||
+        (start.facebook && start.facebook === entry.facebook)
+      );
+
+      if (startEntry) {
+        return {
+          ...entry,
+          expTotal: Math.max(0, entry.expTotal - startEntry.expTotal)
+        };
+      }
+
+      return entry;
+    });
   }
 }

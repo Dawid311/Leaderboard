@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { LeaderboardEntry } from '../types';
+import { LeaderboardEntry, StartExp } from '../types';
 
 export class GoogleSheetsService {
   private credentials: any;
@@ -10,7 +10,7 @@ export class GoogleSheetsService {
     this.sheetId = process.env.GOOGLE_SHEET_ID!;
   }
 
-  async getLeaderboardData(): Promise<LeaderboardEntry[]> {
+  async getLeaderboardData(startExp?: StartExp[]): Promise<LeaderboardEntry[]> {
     try {
       const auth = new google.auth.GoogleAuth({
         credentials: this.credentials,
@@ -36,15 +36,35 @@ export class GoogleSheetsService {
       
       for (let i = 0; i < dataRows.length; i++) {
         const row = dataRows[i];
-        const expTotal = parseFloat(row[7]); // Spalte H (ExpTotal)
+        const currentExpTotal = parseFloat(row[7]); // Spalte H (ExpTotal)
         
         // Skip rows without valid ExpTotal
-        if (!isNaN(expTotal) && expTotal > 0) {
+        if (!isNaN(currentExpTotal) && currentExpTotal > 0) {
+          const instagram = row[0] || undefined;
+          const tiktok = row[1] || undefined;
+          const facebook = row[2] || undefined;
+
+          // Finde den Start-EXP-Wert für diesen User
+          let startValue = 0;
+          if (startExp) {
+            const startEntry = startExp.find(entry => 
+              (entry.instagram && entry.instagram === instagram) ||
+              (entry.tiktok && entry.tiktok === tiktok) ||
+              (entry.facebook && entry.facebook === facebook)
+            );
+            if (startEntry) {
+              startValue = startEntry.expTotal;
+            }
+          }
+
+          // Berechne die Differenz zwischen aktuellem EXP und Start-EXP
+          const expTotal = currentExpTotal - startValue;
+
           validEntries.push({
-            instagram: row[0] || undefined,  // Spalte A (InstagramUser)
-            tiktok: row[1] || undefined,     // Spalte B (TiktokUser)
-            facebook: row[2] || undefined,   // Spalte C (FacebookUser)
-            expTotal,
+            instagram,
+            tiktok,
+            facebook,
+            expTotal: expTotal > 0 ? expTotal : 0, // Verhindere negative Werte
             rank: 0, // Will be set after sorting
           });
         }

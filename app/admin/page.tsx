@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Prize, TimerSettings } from '../../types';
+import { Prize, TimerSettings, LeaderboardEntry } from '../../types';
 
 export default function AdminPage() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
@@ -131,18 +131,38 @@ export default function AdminPage() {
     }
   };
 
-  const restartTimer = () => {
+  const restartTimer = async () => {
     const sevenDaysFromNow = new Date();
     sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
     const isoString = sevenDaysFromNow.toISOString().slice(0, 16);
     
-    if (timer) {
-      setTimer({ 
-        ...timer, 
-        endDate: isoString,
-        isActive: true,
-        title: 'Contest endet in:',
-        description: 'Preisauszahlung erfolgt nach Ablauf des Timers'
+    try {
+      // Hole aktuelle EXP-Werte als Startwerte
+      const response = await fetch('/api/leaderboard');
+      if (!response.ok) throw new Error('Failed to fetch current leaderboard');
+      const data = await response.json();
+      
+      if (timer) {
+        setTimer({ 
+          ...timer, 
+          endDate: isoString,
+          isActive: true,
+          title: 'Contest endet in:',
+          description: 'Preisauszahlung erfolgt nach Ablauf des Timers',
+          contestStartDate: new Date().toISOString(),
+          startExp: data.entries.map((entry: LeaderboardEntry) => ({
+            instagram: entry.instagram,
+            tiktok: entry.tiktok,
+            facebook: entry.facebook,
+            expTotal: entry.expTotal
+          }))
+        });
+      }
+    } catch (error) {
+      console.error('Error getting start values:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Fehler beim Abrufen der Start-EXP-Werte. Bitte versuchen Sie es erneut.' 
       });
     }
   };

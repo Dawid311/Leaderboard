@@ -26,22 +26,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Standard: Komplette Leaderboard-Daten
+    // Hole zuerst Timer und Prizes
+    const [prizes, timer] = await Promise.all([
+      prizeService.getPrizes(),
+      timerService.getTimer(),
+    ]);
+
     // Verwende Demo-Service wenn keine Service Account-Keys gesetzt sind
     const useDemo = !process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.GOOGLE_SHEET_ID;
     
     let entries;
     if (useDemo) {
       const demoService = new DemoSheetsService();
-      entries = await demoService.getLeaderboardData();
+      entries = await demoService.getLeaderboardData(timer.startExp);
     } else {
       const googleSheetsService = new GoogleSheetsService();
-      entries = await googleSheetsService.getLeaderboardData();
+      entries = await googleSheetsService.getLeaderboardData(timer.startExp);
     }
-
-    const [prizes, timer] = await Promise.all([
-      prizeService.getPrizes(),
-      timerService.getTimer(),
-    ]);
 
     const leaderboardData: LeaderboardData = {
       entries,
