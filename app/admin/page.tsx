@@ -1,9 +1,48 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
+
+interface Prize {
+  position: number;
+  description: string;
+  value: string;
+}
+
+interface TimerSettings {
+  isActive: boolean;
+  title: string;
+  description: string;
+  endDate: string;
+  contestStartDate?: string;
+  startExp?: Array<{
+    instagram: number;
+    tiktok: number;
+    facebook: number;
+    expTotal: number;
+  }>;
+}
+
+interface Message {
+  type: 'success' | 'error';
+  text: string;
+}
+
+interface LeaderboardEntry {
+  instagram: number;
+  tiktok: number;
+  facebook: number;
+  expTotal: number;
+}
 
 export default function AdminPage() {
   const router = useRouter();
+  
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [timer, setTimer] = useState<TimerSettings | null>(null);
+  const [message, setMessage] = useState<Message | null>(null);
 
   useEffect(() => {
     // Prüfe Auth-Status und leite um
@@ -338,8 +377,8 @@ export default function AdminPage() {
         
         <div className="prize-form">
           {prizes
-            .sort((a, b) => a.position - b.position)
-            .map((prize, index) => (
+            .sort((a: Prize, b: Prize) => a.position - b.position)
+            .map((prize: Prize, index: number) => (
             <div key={index} className="prize-item">
               <input
                 type="number"
