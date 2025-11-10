@@ -27,7 +27,7 @@ export interface TimerSettings {
   description: string;
   isActive: boolean;
   contestStartDate?: string; // Wann der aktuelle Contest gestartet wurde
-  startExp?: StartExp[]; // Die EXP-Werte zum Zeitpunkt des Contest-Starts
+  startExp?: StartExp[]; // Die EXP-Werte zum Zeitpunkt des Contest-Starts.
 }
 
 export interface LeaderboardData {
