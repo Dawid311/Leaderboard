@@ -12,6 +12,7 @@ export class DemoSheetsService {
         instagram: 'influencer_max',
         tiktok: 'max_tiktok',
         facebook: 'Max Mustermann',
+        youtube: 'MaxInfluencer',
         expTotal: 2500,
         rank: 1,
       },
@@ -19,6 +20,7 @@ export class DemoSheetsService {
         instagram: 'anna_insta',
         tiktok: undefined, // Kein TikTok
         facebook: 'Anna Schmidt',
+        youtube: 'AnnaVlogs',
         expTotal: 2100,
         rank: 2,
       },
@@ -26,6 +28,7 @@ export class DemoSheetsService {
         instagram: undefined, // Kein Instagram
         tiktok: 'tom_viral',
         facebook: 'Thomas Weber',
+        youtube: 'TomGaming',
         expTotal: 1950,
         rank: 3,
       },
@@ -33,6 +36,7 @@ export class DemoSheetsService {
         instagram: 'lisa_photos',
         tiktok: 'lisa_dance',
         facebook: undefined, // Kein Facebook
+        youtube: 'LisaDance',
         expTotal: 1800,
         rank: 4,
       },
@@ -40,6 +44,7 @@ export class DemoSheetsService {
         instagram: 'mike_fitness',
         tiktok: 'mike_workouts',
         facebook: 'Mike Johnson',
+        youtube: 'MikeFitness',
         expTotal: 1650,
         rank: 5,
       },
@@ -52,7 +57,8 @@ export class DemoSheetsService {
       const startEntry = startExp.find(start => 
         (start.instagram && start.instagram === entry.instagram) ||
         (start.tiktok && start.tiktok === entry.tiktok) ||
-        (start.facebook && start.facebook === entry.facebook)
+        (start.facebook && start.facebook === entry.facebook) ||
+        (start.youtube && start.youtube === entry.youtube)
       );
 
       if (startEntry) {

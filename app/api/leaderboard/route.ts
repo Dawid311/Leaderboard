@@ -17,12 +17,22 @@ export async function GET(request: NextRequest) {
     // Handle spezifische Aktionen
     if (action === 'prizes') {
       const prizes = await prizeService.getPrizes();
-      return NextResponse.json(prizes);
+      const response = NextResponse.json(prizes);
+      // Verhindere Caching
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      return response;
     }
 
     if (action === 'timer') {
       const timer = await timerService.getTimer();
-      return NextResponse.json(timer);
+      const response = NextResponse.json(timer);
+      // Verhindere Caching
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      return response;
     }
 
     // Standard: Komplette Leaderboard-Daten
@@ -51,7 +61,12 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     };
 
-    return NextResponse.json(leaderboardData);
+    const response = NextResponse.json(leaderboardData);
+    // Verhindere Caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
   } catch (error) {
     console.error('Error in leaderboard API:', error);
     return NextResponse.json(

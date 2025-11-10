@@ -31,7 +31,9 @@ export default function HomePage() {
 
   const fetchTimerData = async () => {
     try {
-      const response = await fetch('/api/leaderboard?action=timer');
+      // Cache-Busting mit Timestamp
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/leaderboard?action=timer&t=${timestamp}`);
       if (response.ok) {
         const timer = await response.json();
         setTimerData(timer);
@@ -44,7 +46,9 @@ export default function HomePage() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/leaderboard');
+      // Cache-Busting mit Timestamp
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/leaderboard?t=${timestamp}`);
       if (!response.ok) {
         throw new Error('Failed to fetch leaderboard');
       }
@@ -119,7 +123,7 @@ export default function HomePage() {
             <thead>
               <tr>
                 <th>Rang</th>
-                <th>Namen</th>
+                <th>Social Media Accounts</th>
                 <th>ExpTotal</th>
               </tr>
             </thead>
@@ -147,6 +151,11 @@ export default function HomePage() {
                       {entry.facebook && (
                         <span className="social-name facebook">
                           👥 {entry.facebook}
+                        </span>
+                      )}
+                      {entry.youtube && (
+                        <span className="social-name youtube">
+                          🎬 {entry.youtube}
                         </span>
                       )}
                     </div>

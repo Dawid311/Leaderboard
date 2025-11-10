@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { redirect } from 'next/navigation';
+import { LeaderboardEntry } from '../../types';
 
 interface Prize {
   position: number;
@@ -28,12 +29,7 @@ interface Message {
   text: string;
 }
 
-interface LeaderboardEntry {
-  instagram: number;
-  tiktok: number;
-  facebook: number;
-  expTotal: number;
-}
+
 
 export default function AdminPage() {
   const router = useRouter();
@@ -47,9 +43,11 @@ export default function AdminPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      // Cache-Busting mit Timestamp
+      const timestamp = new Date().getTime();
       const [prizeResponse, timerResponse] = await Promise.all([
-        fetch('/api/leaderboard?action=prizes'),
-        fetch('/api/leaderboard?action=timer')
+        fetch(`/api/leaderboard?action=prizes&t=${timestamp}`),
+        fetch(`/api/leaderboard?action=timer&t=${timestamp}`)
       ]);
       
       if (prizeResponse.ok) {
@@ -211,6 +209,7 @@ export default function AdminPage() {
             instagram: entry.instagram,
             tiktok: entry.tiktok,
             facebook: entry.facebook,
+            youtube: entry.youtube,
             expTotal: entry.expTotal
           }))
         };

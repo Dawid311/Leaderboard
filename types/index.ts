@@ -2,6 +2,7 @@ export interface LeaderboardEntry {
   instagram?: string;
   tiktok?: string;
   facebook?: string;
+  youtube?: string;
   expTotal: number;
   rank: number;
 }
@@ -16,6 +17,7 @@ export interface StartExp {
   instagram?: string;
   tiktok?: string;
   facebook?: string;
+  youtube?: string;
   expTotal: number;
 }
 

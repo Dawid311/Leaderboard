@@ -21,7 +21,7 @@ export class GoogleSheetsService {
 
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId: this.sheetId,
-        range: 'Globaluser!A:H', // Globaluser Sheet, Spalten A bis H
+        range: 'Globaluser!A:R', // Globaluser Sheet, Spalten A bis R (für Namen)
       });
 
       const rows = response.data.values;
@@ -43,6 +43,7 @@ export class GoogleSheetsService {
           const instagram = row[0] || undefined;
           const tiktok = row[1] || undefined;
           const facebook = row[2] || undefined;
+          const youtube = row[17] || undefined; // Spalte R (Index 17) - YouTube Username
 
           // Finde den Start-EXP-Wert für diesen User
           let startValue = 0;
@@ -50,7 +51,8 @@ export class GoogleSheetsService {
             const startEntry = startExp.find(entry => 
               (entry.instagram && entry.instagram === instagram) ||
               (entry.tiktok && entry.tiktok === tiktok) ||
-              (entry.facebook && entry.facebook === facebook)
+              (entry.facebook && entry.facebook === facebook) ||
+              (entry.youtube && entry.youtube === youtube)
             );
             if (startEntry) {
               startValue = startEntry.expTotal;
@@ -64,6 +66,7 @@ export class GoogleSheetsService {
             instagram,
             tiktok,
             facebook,
+            youtube,
             expTotal: expTotal > 0 ? expTotal : 0, // Verhindere negative Werte
             rank: 0, // Will be set after sorting
           });
