@@ -7,10 +7,39 @@ export default function HomePage() {
   const [data, setData] = useState<LeaderboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [timerData, setTimerData] = useState<any>(null);
 
   useEffect(() => {
     fetchLeaderboard();
+    fetchTimerData();
+    
+    // Aktualisiere Leaderboard-Daten alle 60 Sekunden
+    const leaderboardInterval = setInterval(() => {
+      fetchLeaderboard();
+    }, 60000);
+
+    // Aktualisiere Timer-Daten alle 10 Sekunden für schnellere Updates
+    const timerInterval = setInterval(() => {
+      fetchTimerData();
+    }, 10000);
+
+    return () => {
+      clearInterval(leaderboardInterval);
+      clearInterval(timerInterval);
+    };
   }, []);
+
+  const fetchTimerData = async () => {
+    try {
+      const response = await fetch('/api/leaderboard?action=timer');
+      if (response.ok) {
+        const timer = await response.json();
+        setTimerData(timer);
+      }
+    } catch (err) {
+      console.error('Fehler beim Laden der Timer-Daten:', err);
+    }
+  };
 
   const fetchLeaderboard = async () => {
     try {
@@ -60,7 +89,7 @@ export default function HomePage() {
       {data && (
         <>
           {/* Timer Section */}
-          <CountdownTimer timer={data.timer} />
+          <CountdownTimer timer={timerData || data.timer} />
 
           <div style={{ marginBottom: '20px' }}>
             <small>Letzte Aktualisierung: {new Date(data.lastUpdated).toLocaleString('de-DE')}</small>
